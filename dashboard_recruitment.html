@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Recrutement - CV Indeed</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .login-container h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .login-container p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .login-container button:hover { opacity: 0.9; }
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+        .dashboard {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .logout {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header h1 { color: #333; margin-bottom: 10px; }
+        .header p { color: #666; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .stat-card .number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .candidate-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        }
+        .candidate-card h3 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        .candidate-card .poste {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .candidate-card .info {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            color: #555;
+            font-size: 14px;
+        }
+        .candidate-card .info-icon {
+            width: 20px;
+            margin-right: 10px;
+            text-align: center;
+        }
+        .candidate-card .date {
+            color: #999;
+            font-size: 12px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .candidate-card a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .candidate-card a:hover { text-decoration: underline; }
+        .na { color: #999; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginScreen">
+        <h1>🔒 Dashboard Recrutement</h1>
+        <p>Accès protégé - Entrez le mot de passe</p>
+        <input type="password" id="password" placeholder="Mot de passe" onkeypress="if(event.key==='Enter')login()">
+        <button onclick="login()">Se connecter</button>
+        <p class="error" id="errorMsg">Mot de passe incorrect</p>
+    </div>
+
+    <div class="dashboard" id="dashboard">
+        <div class="logout" onclick="logout()">Déconnexion</div>
+        
+        <div class="header">
+            <h1>📋 Candidatures Indeed</h1>
+            <p>Poste: Assistant ingénieur en énergie - Fès</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Candidats</h3>
+                <div class="number" id="totalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Cette semaine</h3>
+                <div class="number" id="weekCount">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Aujourd'hui</h3>
+                <div class="number" id="todayCount">0</div>
+            </div>
+        </div>
+
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Rechercher un candidat..." onkeyup="filterCandidates()">
+
+        <div class="candidates-grid" id="candidatesGrid"></div>
+    </div>
+
+    <script>
+        const CORRECT_PASSWORD = 'omar2024';
+        const CANDIDATES_DATA = [{"name": "Mohammed Benmoussa", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 14:07:57 +0000", "sender": "Mohammed Benmoussa <conversation-mohammedbenmoussa-82sad@indeedemail.com>"}, {"name": "Sara Erraji", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 12:54:11 +0000", "sender": "Sara Erraji <conversation-saraerraji-y42yv@indeedemail.com>"}, {"name": "Youssef Ait Akka", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 12:37:58 +0000", "sender": "Youssef Ait Akka <conversation-youssefaitakka-a4tnx@indeedemail.com>"}, {"name": "Meryem BEZZARI", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 10:49:26 +0000", "sender": "Meryem BEZZARI <conversation-meryembezzari-0d6lj@indeedemail.com>"}, {"name": "BOUKHALEF JIHAN", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 10:43:29 +0000", "sender": "BOUKHALEF JIHAN <conversation-jihaneboukhaled-qmu26@indeedemail.com>"}, {"name": "Lamiyae Dhibette", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 09:50:51 +0000", "sender": "Lamiyae Dhibette <conversation-lamiyae-8mmqd@indeedemail.com>"}, {"name": "NADIA GAIDI", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-nadiagaidi-e7gop@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 09:40:33 +0000", "sender": "NADIA GAIDI <conversation-nadiagaidi-e7gop@indeedemail.com>"}, {"name": "Oussama Ben KHADDA", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-benkhadda-auorl@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 09:29:12 +0000", "sender": "Oussama Ben KHADDA <conversation-benkhadda-auorl@indeedemail.com>"}, {"name": "IMANE ZENZEN", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-imanezenzen-p8kpd@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 08:56:18 +0000", "sender": "IMANE ZENZEN <conversation-imanezenzen-p8kpd@indeedemail.com>"}, {"name": "CHAIMAE ICHRAK", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-chaimaeichrak-yl8jy@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 08:27:35 +0000", "sender": "CHAIMAE ICHRAK <conversation-chaimaeichrak-yl8jy@indeedemail.com>"}, {"name": "Indeed Entreprises", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 08:13:24 +0000", "sender": "\"Indeed Entreprises\" <employers-noreply@indeed.com>"}, {"name": "SAFAE BOUAAGAD", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Fri, 20 Feb 2026 02:20:41 +0000", "sender": "SAFAE BOUAAGAD <conversation-safaebouaagad-4g3wa@indeedemail.com>"}, {"name": "Zakariae Azzi", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 16:34:51 +0000", "sender": "Zakariae Azzi <conversation-zakariaeazzi-4f24a@indeedemail.com>"}, {"name": "Abderrahmane EL MENNANI", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 16:13:53 +0000", "sender": "Abderrahmane EL MENNANI <conversation-abderrahmaneelmennani-rjeqz@indeedemail.com>"}, {"name": "AYOUB ARBIDI", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 15:51:15 +0000", "sender": "AYOUB ARBIDI <conversation-ayoubarbidi-ib9b5@indeedemail.com>"}, {"name": "Amine BENJAMIA", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 15:51:06 +0000", "sender": "Amine BENJAMIA <conversation-aminebenjamia-2a466@indeedemail.com>"}, {"name": "KHAOULA EL- KHALLOUFY", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 11:43:27 +0000", "sender": "KHAOULA EL- KHALLOUFY <conversation-mo3jhil@indeedemail.com>"}, {"name": "NDOUFI LOUBNA", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 11:16:31 +0000", "sender": "NDOUFI LOUBNA <conversation-loubnandoufi-l5ovq@indeedemail.com>"}, {"name": "Mohamed El-achaby", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-c8us4wv@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 11:15:57 +0000", "sender": "Mohamed El-achaby <conversation-c8us4wv@indeedemail.com>"}, {"name": "NDOUFI LOUBNA", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-loubnandoufi-l5ovq@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 11:09:40 +0000", "sender": "NDOUFI LOUBNA <conversation-loubnandoufi-l5ovq@indeedemail.com>"}, {"name": "Zakaria KOUZI", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-zakariakouzi-jlv36@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 10:49:57 +0000", "sender": "Zakaria KOUZI <conversation-zakariakouzi-jlv36@indeedemail.com>"}, {"name": "Asmae Dahik", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-asmaedahik-kjm8i@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 09:53:32 +0000", "sender": "Asmae Dahik <conversation-asmaedahik-kjm8i@indeedemail.com>"}, {"name": "Indeed Entreprises", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 08:12:33 +0000", "sender": "\"Indeed Entreprises\" <employers-noreply@indeed.com>"}, {"name": "ABDENNASAR EL BATTIOUI", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Thu, 19 Feb 2026 06:30:23 +0000", "sender": "ABDENNASAR EL BATTIOUI <conversation-abdennasarelbattioui-z04cb@indeedemail.com>"}, {"name": "Zakaria Laafari", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Wed, 18 Feb 2026 14:24:49 +0000", "sender": "Zakaria Laafari <conversation-zakarialaafari-o4dbc@indeedemail.com>"}, {"name": "Zakaria Laafari", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-zakarialaafari-o4dbc@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Wed, 18 Feb 2026 13:56:05 +0000", "sender": "Zakaria Laafari <conversation-zakarialaafari-o4dbc@indeedemail.com>"}, {"name": "Amine BENJAMIA", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-aminebenjamia-2a466@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Wed, 18 Feb 2026 13:25:41 +0000", "sender": "Amine BENJAMIA <conversation-aminebenjamia-2a466@indeedemail.com>"}, {"name": "AYOUB ARBIDI", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-ayoubarbidi-ib9b5@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Wed, 18 Feb 2026 13:16:47 +0000", "sender": "AYOUB ARBIDI <conversation-ayoubarbidi-ib9b5@indeedemail.com>"}, {"name": "Abderrahmane EL MENNANI", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "conversation-abderrahmaneelmennani-rjeqz@indeedemail.com", "phone": "N/A", "cv_link": "", "date": "Wed, 18 Feb 2026 13:12:11 +0000", "sender": "Abderrahmane EL MENNANI <conversation-abderrahmaneelmennani-rjeqz@indeedemail.com>"}, {"name": "Indeed", "poste": "Assistant ingénieur en énergie", "ville": "Fès", "email": "N/A", "phone": "N/A", "cv_link": "", "date": "Wed, 18 Feb 2026 12:00:37 +0000", "sender": "Indeed <no-reply@indeed.com>"}];
+
+        function login() {
+            const password = document.getElementById('password').value;
+            if (password === CORRECT_PASSWORD) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                loadCandidates();
+            } else {
+                document.getElementById('errorMsg').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMsg').style.display = 'none';
+        }
+
+        function loadCandidates() {
+            displayCandidates(CANDIDATES_DATA);
+            updateStats();
+        }
+
+        function displayCandidates(candidatesList) {
+            const grid = document.getElementById('candidatesGrid');
+            grid.innerHTML = '';
+
+            candidatesList.forEach((c, index) => {
+                const card = document.createElement('div');
+                card.className = 'candidate-card';
+                
+                const emailDisplay = c.email !== 'N/A' 
+                    ? `<a href="mailto:${c.email}">${c.email}</a>`
+                    : '<span class="na">Email privé (Indeed)</span>';
+                
+                const phoneDisplay = c.phone !== 'N/A'
+                    ? c.phone
+                    : '<span class="na">Téléphone privé (Indeed)</span>';
+                
+                const cvLink = c.cv_link 
+                    ? `<div class="info"><span class="info-icon">🔗</span><a href="${c.cv_link}" target="_blank">Voir sur Indeed</a></div>`
+                    : '';
+                
+                card.innerHTML = `
+                    <h3>#${index + 1} ${c.name}</h3>
+                    <div class="poste">${c.poste}</div>
+                    <div class="info"><span class="info-icon">📍</span>${c.ville}</div>
+                    <div class="info"><span class="info-icon">📧</span>${emailDisplay}</div>
+                    <div class="info"><span class="info-icon">📱</span>${phoneDisplay}</div>
+                    ${cvLink}
+                    <div class="date">📅 ${formatDate(c.date)}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function formatDate(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('fr-FR', { 
+                    day: 'numeric', month: 'long', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+            } catch { return dateStr; }
+        }
+
+        function updateStats() {
+            document.getElementById('totalCount').textContent = CANDIDATES_DATA.length;
+            
+            const now = new Date();
+            const oneWeekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+            const today = new Date(now.setHours(0,0,0,0));
+            
+            const weekCount = CANDIDATES_DATA.filter(c => new Date(c.date) > oneWeekAgo).length;
+            const todayCount = CANDIDATES_DATA.filter(c => new Date(c.date) >= today).length;
+            
+            document.getElementById('weekCount').textContent = weekCount;
+            document.getElementById('todayCount').textContent = todayCount;
+        }
+
+        function filterCandidates() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = CANDIDATES_DATA.filter(c => 
+                c.name.toLowerCase().includes(searchTerm) || 
+                c.poste.toLowerCase().includes(searchTerm) ||
+                c.ville.toLowerCase().includes(searchTerm)
+            );
+            displayCandidates(filtered);
+        }
+    </script>
+</body>
+</html>
